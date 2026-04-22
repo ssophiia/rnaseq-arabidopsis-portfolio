@@ -1,0 +1,2809 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Arabidopsis Heat Stress | Transcriptomic Analysis</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0a0e14;
+        --bg2: #0f1520;
+        --bg3: #141c2a;
+        --surface: #1a2535;
+        --border: #1e2d42;
+        --accent: #4ade80;
+        --accent2: #f97316;
+        --accent3: #60a5fa;
+        --red: #f87171;
+        --text: #e2e8f0;
+        --muted: #64748b;
+        --dim: #334155;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "DM Sans", sans-serif;
+        font-size: 16px;
+        line-height: 1.7;
+        overflow-x: hidden;
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 600px;
+        height: 100vh;
+        background:
+          radial-gradient(
+            ellipse at 80% 20%,
+            rgba(74, 222, 128, 0.04) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse at 90% 70%,
+            rgba(96, 165, 250, 0.04) 0%,
+            transparent 50%
+          );
+        pointer-events: none;
+        z-index: 0;
+      }
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 3rem;
+        background: rgba(10, 14, 20, 0.9);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+      }
+      .nav-logo {
+        font-family: "DM Mono", monospace;
+        font-size: 0.8rem;
+        color: var(--accent);
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+      }
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+      }
+      .nav-links a {
+        text-decoration: none;
+        color: var(--muted);
+        font-size: 0.85rem;
+        letter-spacing: 0.05em;
+        transition: color 0.2s;
+      }
+      .nav-links a:hover {
+        color: var(--text);
+      }
+      .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        padding: 8rem 3rem 4rem;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero-grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(30, 45, 66, 0.3) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(30, 45, 66, 0.3) 1px, transparent 1px);
+        background-size: 60px 60px;
+        mask-image: radial-gradient(
+          ellipse at 30% 50%,
+          black 30%,
+          transparent 70%
+        );
+      }
+      .hero-content {
+        position: relative;
+        max-width: 800px;
+      }
+      .hero-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: "DM Mono", monospace;
+        font-size: 0.75rem;
+        color: var(--accent);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        margin-bottom: 1.5rem;
+      }
+      .hero-tag::before {
+        content: "";
+        width: 24px;
+        height: 1px;
+        background: var(--accent);
+      }
+      h1 {
+        font-family: "DM Serif Display", serif;
+        font-size: clamp(2.5rem, 5vw, 4rem);
+        line-height: 1.1;
+        margin-bottom: 0.5rem;
+      }
+      h1 em {
+        font-style: italic;
+        color: var(--accent);
+      }
+      .hero-subtitle {
+        font-size: 1.1rem;
+        color: var(--muted);
+        margin: 1.5rem 0 2rem;
+        max-width: 580px;
+      }
+      .hero-finding {
+        display: inline-block;
+        padding: 1rem 1.5rem;
+        background: linear-gradient(
+          135deg,
+          rgba(74, 222, 128, 0.08),
+          rgba(96, 165, 250, 0.05)
+        );
+        border: 1px solid rgba(74, 222, 128, 0.2);
+        border-radius: 4px;
+        font-size: 0.9rem;
+        margin-bottom: 2.5rem;
+        max-width: 580px;
+      }
+      .hero-finding strong {
+        color: var(--accent);
+      }
+      .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 2.5rem;
+      }
+      .tag {
+        font-family: "DM Mono", monospace;
+        font-size: 0.72rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 2px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .tag-bio {
+        background: rgba(74, 222, 128, 0.1);
+        color: var(--accent);
+        border: 1px solid rgba(74, 222, 128, 0.2);
+      }
+      .tag-tool {
+        background: rgba(96, 165, 250, 0.1);
+        color: var(--accent3);
+        border: 1px solid rgba(96, 165, 250, 0.2);
+      }
+      .tag-method {
+        background: rgba(249, 115, 22, 0.1);
+        color: var(--accent2);
+        border: 1px solid rgba(249, 115, 22, 0.2);
+      }
+      .hero-buttons {
+        display: flex;
+        gap: 1rem;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.7rem 1.5rem;
+        border-radius: 3px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+        cursor: pointer;
+        border: none;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #0a0e14;
+      }
+      .btn-primary:hover {
+        background: #86efac;
+        transform: translateY(-1px);
+      }
+      .btn-outline {
+        background: transparent;
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+      .btn-outline:hover {
+        border-color: var(--muted);
+      }
+      .scroll-hint {
+        position: absolute;
+        bottom: 2rem;
+        left: 3rem;
+        font-family: "DM Mono", monospace;
+        font-size: 0.7rem;
+        color: var(--muted);
+        letter-spacing: 0.1em;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .scroll-hint::after {
+        content: "";
+        width: 40px;
+        height: 1px;
+        background: var(--dim);
+      }
+      section {
+        padding: 5rem 3rem;
+        position: relative;
+      }
+      section + section {
+        border-top: 1px solid var(--border);
+      }
+      .section-label {
+        font-family: "DM Mono", monospace;
+        font-size: 0.7rem;
+        color: var(--muted);
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .section-label::after {
+        content: "";
+        flex: 1;
+        max-width: 60px;
+        height: 1px;
+        background: var(--dim);
+      }
+      h2 {
+        font-family: "DM Serif Display", serif;
+        font-size: clamp(1.8rem, 3vw, 2.5rem);
+        color: var(--text);
+        margin-bottom: 1rem;
+      }
+      h3 {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--text);
+        margin-bottom: 0.5rem;
+      }
+      p {
+        color: var(--muted);
+        margin-bottom: 1rem;
+      }
+      p:last-child {
+        margin-bottom: 0;
+      }
+      .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1px;
+        background: var(--border);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 2.5rem;
+      }
+      .card {
+        background: var(--bg2);
+        padding: 1.75rem;
+        transition: background 0.2s;
+      }
+      .card:hover {
+        background: var(--bg3);
+      }
+      .card-value {
+        font-family: "DM Serif Display", serif;
+        font-size: 2.5rem;
+        color: var(--accent);
+        line-height: 1;
+        margin-bottom: 0.25rem;
+      }
+      .card-label {
+        font-size: 0.8rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      .card-sub {
+        font-family: "DM Mono", monospace;
+        font-size: 0.72rem;
+        color: var(--dim);
+        margin-top: 0.5rem;
+      }
+      .pipeline {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        margin: 2rem 0;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+      }
+      .pipe-step {
+        flex-shrink: 0;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 3px;
+        padding: 1rem 1.25rem;
+        text-align: center;
+        min-width: 110px;
+        transition: border-color 0.2s;
+      }
+      .pipe-step:hover {
+        border-color: var(--accent);
+      }
+      .pipe-icon {
+        font-size: 1.4rem;
+        margin-bottom: 0.4rem;
+      }
+      .pipe-name {
+        font-family: "DM Mono", monospace;
+        font-size: 0.7rem;
+        color: var(--accent);
+        font-weight: 500;
+        display: block;
+      }
+      .pipe-tool {
+        font-size: 0.7rem;
+        color: var(--muted);
+        margin-top: 0.25rem;
+      }
+      .pipe-arrow {
+        color: var(--dim);
+        font-size: 1.2rem;
+        padding: 0 0.25rem;
+        flex-shrink: 0;
+      }
+      .divider {
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--border),
+          transparent
+        );
+        margin: 2rem 0;
+      }
+      .highlight-text {
+        color: var(--accent);
+        font-family: "DM Mono", monospace;
+        font-size: 0.9em;
+      }
+      .note {
+        font-size: 0.8rem;
+        color: var(--dim);
+        font-style: italic;
+        margin-top: 1rem;
+      }
+      .img-slot {
+        border: 2px dashed var(--border);
+        border-radius: 4px;
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 0.5rem;
+        background: var(--bg2);
+        transition: border-color 0.2s;
+        cursor: pointer;
+        overflow: hidden;
+        position: relative;
+      }
+      .img-slot:hover {
+        border-color: var(--muted);
+      }
+      .img-slot img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 2px;
+      }
+      .img-slot-label {
+        font-family: "DM Mono", monospace;
+        font-size: 0.72rem;
+        color: var(--muted);
+        text-align: center;
+        padding: 0 1rem;
+      }
+      .img-slot svg {
+        color: var(--dim);
+      }
+      .pca-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+        align-items: center;
+        margin-top: 2.5rem;
+      }
+      .baseline-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-top: 2.5rem;
+      }
+      .baseline-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 1.75rem;
+      }
+      .baseline-card.active {
+        border-color: rgba(74, 222, 128, 0.3);
+      }
+      .baseline-title {
+        font-family: "DM Mono", monospace;
+        font-size: 0.75rem;
+        color: var(--accent);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 1rem;
+      }
+      .baseline-q {
+        font-size: 0.85rem;
+        color: var(--text);
+        margin-bottom: 1rem;
+        font-style: italic;
+      }
+      .baseline-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      .baseline-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+      .baseline-arrow {
+        color: var(--accent);
+        flex-shrink: 0;
+      }
+
+      /* ── VOLCANO ROW ── */
+      .volcano-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        margin-top: 2.5rem;
+      }
+      .volcano-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        overflow: hidden;
+        transition:
+          border-color 0.2s,
+          transform 0.2s;
+      }
+      .volcano-card:hover {
+        border-color: rgba(74, 222, 128, 0.3);
+        transform: translateY(-2px);
+      }
+      .volcano-img-wrap {
+        aspect-ratio: 4/3;
+        background: var(--bg3);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 0.5rem;
+        overflow: hidden;
+        position: relative;
+      }
+      .volcano-img-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      .volcano-meta {
+        padding: 1.25rem;
+      }
+      .volcano-title {
+        font-family: "DM Mono", monospace;
+        font-size: 0.78rem;
+        color: var(--accent);
+        letter-spacing: 0.06em;
+        margin-bottom: 0.6rem;
+      }
+      .volcano-stats {
+        display: flex;
+        gap: 0.6rem;
+        margin-bottom: 0.75rem;
+        flex-wrap: wrap;
+      }
+      .vstat {
+        font-family: "DM Mono", monospace;
+        font-size: 0.68rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 2px;
+      }
+      .vstat-up {
+        background: rgba(74, 222, 128, 0.1);
+        color: var(--accent);
+      }
+      .vstat-down {
+        background: rgba(248, 113, 113, 0.1);
+        color: var(--red);
+      }
+      .vstat-total {
+        background: rgba(96, 165, 250, 0.1);
+        color: var(--accent3);
+      }
+      .volcano-desc {
+        font-size: 0.82rem;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+      .volcano-gene {
+        font-family: "DM Mono", monospace;
+        color: var(--text);
+        font-size: 0.8rem;
+      }
+
+      /* ── 5-PHASE TABS ── */
+      .phases-tabs {
+        display: flex;
+        gap: 0;
+        margin-top: 2.5rem;
+        border-bottom: 1px solid var(--border);
+        overflow-x: auto;
+      }
+      .phase-tab {
+        flex-shrink: 0;
+        padding: 0.75rem 1.25rem;
+        font-family: "DM Mono", monospace;
+        font-size: 0.75rem;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        transition: all 0.2s;
+        user-select: none;
+        white-space: nowrap;
+      }
+      .phase-tab::first-letter {
+        font-size: 2em;
+      }
+      .phase-tab:hover {
+        color: var(--text);
+      }
+      .phase-tab.active {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+      }
+      .phase-content {
+        display: none;
+        padding-top: 2rem;
+      }
+      .phase-content.active {
+        display: block;
+      }
+      .phase-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+      }
+      .phase-badge {
+        font-family: "DM Mono", monospace;
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        padding: 0.3rem 0.8rem;
+        border-radius: 2px;
+        text-transform: uppercase;
+      }
+      .phase-badge-ctrl {
+        background: rgba(96, 165, 250, 0.1);
+        color: var(--accent3);
+        border: 1px solid rgba(96, 165, 250, 0.2);
+      }
+      .phase-badge-stress {
+        background: rgba(249, 115, 22, 0.1);
+        color: var(--accent2);
+        border: 1px solid rgba(249, 115, 22, 0.2);
+      }
+      .phase-badge-rec {
+        background: rgba(74, 222, 128, 0.1);
+        color: var(--accent);
+        border: 1px solid rgba(74, 222, 128, 0.2);
+      }
+      .phase-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+      .phase-col-title {
+        font-family: "DM Mono", monospace;
+        font-size: 0.72rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border);
+      }
+      .phase-col-title.up {
+        color: var(--accent);
+      }
+      .phase-col-title.down {
+        color: var(--red);
+      }
+      .process-item {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.4rem 0;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .dot-green {
+        background: var(--accent);
+      }
+      .dot-red {
+        background: var(--red);
+      }
+
+      /* ── ENRICHMENT TABLE ── */
+      .enrichment-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        overflow: hidden;
+      }
+      .enr-header-row th {
+        background: var(--bg3);
+        padding: 0.875rem 1.25rem;
+        text-align: center;
+        font-family: "DM Mono", monospace;
+        font-size: 0.75rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--border);
+        font-weight: 500;
+      }
+      .enr-header-row th:not(:last-child) {
+        border-right: 1px solid var(--border);
+      }
+      .enr-header-row th.col-label {
+        color: var(--muted);
+        min-width: 130px;
+        text-align: left;
+      }
+      .enr-header-row th.col-go-bp {
+        color: var(--accent);
+      }
+      .enr-header-row th.col-go-mf {
+        color: var(--accent3);
+      }
+      .enr-header-row th.col-kegg {
+        color: var(--accent2);
+      }
+      .enr-toggle-row {
+        cursor: pointer;
+        transition: background 0.15s;
+        user-select: none;
+      }
+      .enr-toggle-row:hover td {
+        background: var(--bg3);
+      }
+      .enr-toggle-row td {
+        padding: 0.75rem 1.25rem;
+        font-family: "DM Mono", monospace;
+        font-size: 0.78rem;
+        letter-spacing: 0.06em;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+      }
+      .enr-toggle-row.up td {
+        color: var(--accent);
+        background: rgba(74, 222, 128, 0.04);
+      }
+      .enr-toggle-row.down td {
+        color: var(--red);
+        background: rgba(248, 113, 113, 0.04);
+      }
+      .enr-toggle-row td:not(:last-child) {
+        border-right: 1px solid var(--border);
+      }
+      .label-cell {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 500;
+      }
+      .chevron {
+        font-size: 0.7rem;
+        transition: transform 0.2s;
+        display: inline-block;
+      }
+      .chevron.open {
+        transform: rotate(180deg);
+      }
+      .enr-content-row {
+        display: none;
+      }
+      .enr-content-row.open {
+        display: table-row;
+      }
+      .enr-content-row td {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+      }
+      .enr-content-row td:not(:last-child) {
+        border-right: 1px solid var(--border);
+      }
+      .enr-graph {
+        aspect-ratio: 4/3;
+        background: var(--bg);
+        border: 1px dashed var(--border);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 0.4rem;
+        cursor: pointer;
+        transition: border-color 0.2s;
+        overflow: hidden;
+        position: relative;
+      }
+      .enr-graph:hover {
+        border-color: var(--muted);
+      }
+      .enr-graph img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 3px;
+      }
+      .enr-graph-label {
+        font-family: "DM Mono", monospace;
+        font-size: 0.65rem;
+        color: var(--muted);
+        text-align: center;
+        padding: 0 0.5rem;
+      }
+      .enr-graph svg {
+        color: var(--dim);
+      }
+      .phase-conclusion {
+        background: var(--bg2);
+        border-left: 3px solid var(--accent);
+        padding: 1rem 1.25rem;
+        border-radius: 0 4px 4px 0;
+        font-size: 0.875rem;
+        color: var(--text);
+        margin-top: 1.5rem;
+      }
+      .phase-conclusion.down-border {
+        border-left-color: var(--red);
+      }
+
+      /* DREB */
+      .dreb-intro {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 3rem;
+        margin-top: 2.5rem;
+        align-items: start;
+      }
+      .dreb-highlight {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 1.25rem;
+        border-left: 3px solid var(--accent);
+        margin-bottom: 1rem;
+      }
+      .dreb-highlight:nth-child(2) {
+        border-left-color: var(--accent3);
+      }
+      .dreb-highlight:nth-child(3) {
+        border-left-color: var(--accent2);
+      }
+      .dreb-highlight:nth-child(4) {
+        border-left-color: #a855f7;
+      }
+      .dreb-highlight h4 {
+        font-size: 0.78rem;
+        font-family: "DM Mono", monospace;
+        letter-spacing: 0.06em;
+        color: var(--accent);
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+      }
+      .dreb-highlight:nth-child(2) h4 {
+        color: var(--accent3);
+      }
+      .dreb-highlight:nth-child(3) h4 {
+        color: var(--accent2);
+      }
+      .dreb-highlight:nth-child(4) h4 {
+        color: #a855f7;
+      }
+      .dreb-highlight p {
+        font-size: 0.85rem;
+        margin: 0;
+      }
+      .gene-table {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+      }
+      .gene-table-title {
+        padding: 0.75rem 1rem;
+        font-family: "DM Mono", monospace;
+        font-size: 0.72rem;
+        color: var(--muted);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--border);
+        background: var(--bg3);
+      }
+      .gene-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.6rem 1rem;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.8rem;
+      }
+      .gene-row:last-child {
+        border-bottom: none;
+      }
+      .gene-name {
+        font-family: "DM Mono", monospace;
+        color: var(--text);
+      }
+      .gene-lfc {
+        color: var(--accent);
+        font-family: "DM Mono", monospace;
+        font-size: 0.75rem;
+      }
+      .gene-lfc.neg {
+        color: var(--red);
+      }
+      .dreb-graphs {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+        margin-top: 1.5rem;
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .dreb-graph-full {
+        grid-column: 1 / -1;
+      }
+
+      /* SUMMARY TABLE */
+      .phase-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 2rem;
+        font-size: 0.875rem;
+      }
+      .phase-table th {
+        font-family: "DM Mono", monospace;
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+        padding: 0.75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+        background: var(--bg2);
+      }
+      .phase-table td {
+        padding: 0.875rem 1rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--muted);
+        vertical-align: top;
+      }
+      .phase-table tr:last-child td {
+        border-bottom: none;
+      }
+      .phase-table td:first-child {
+        color: var(--text);
+        font-weight: 500;
+      }
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.78rem;
+        font-family: "DM Mono", monospace;
+        padding: 0.2rem 0.5rem;
+        border-radius: 2px;
+      }
+      .status-red {
+        background: rgba(248, 113, 113, 0.1);
+        color: var(--red);
+      }
+      .status-yellow {
+        background: rgba(251, 191, 36, 0.1);
+        color: #fbbf24;
+      }
+      .status-green {
+        background: rgba(74, 222, 128, 0.1);
+        color: var(--accent);
+      }
+
+      /* TECH */
+      .tech-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-top: 2.5rem;
+      }
+      .tech-group {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 1.5rem;
+      }
+      .tech-group-title {
+        font-family: "DM Mono", monospace;
+        font-size: 0.7rem;
+        color: var(--muted);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border);
+      }
+      .tech-item {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.4rem 0;
+        font-size: 0.85rem;
+        color: var(--text);
+      }
+      .tech-dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--accent);
+        flex-shrink: 0;
+      }
+
+      .links-section {
+        background: var(--bg2);
+        padding: 3rem;
+        text-align: center;
+        border-top: 1px solid var(--border);
+      }
+      .links-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+      }
+
+      .lightbox {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        background: rgba(0, 0, 0, 0.92);
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+      }
+      .lightbox.open {
+        display: flex;
+      }
+      .lightbox img {
+        max-width: 92vw;
+        max-height: 92vh;
+        border-radius: 4px;
+        object-fit: contain;
+      }
+      .lightbox-close {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        background: none;
+        border: none;
+        color: var(--muted);
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0.5rem;
+      }
+      .lightbox-close:hover {
+        color: var(--text);
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .hero-content > * {
+        animation: fadeUp 0.6s ease both;
+      }
+      .hero-content > *:nth-child(1) {
+        animation-delay: 0.1s;
+      }
+      .hero-content > *:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .hero-content > *:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+      .hero-content > *:nth-child(4) {
+        animation-delay: 0.4s;
+      }
+      .hero-content > *:nth-child(5) {
+        animation-delay: 0.5s;
+      }
+      .hero-content > *:nth-child(6) {
+        animation-delay: 0.6s;
+      }
+
+      @media (max-width: 900px) {
+        nav {
+          padding: 1rem 1.5rem;
+        }
+        .nav-links {
+          display: none;
+        }
+        section {
+          padding: 3rem 1.5rem;
+        }
+        .hero {
+          padding: 7rem 1.5rem 3rem;
+        }
+        .volcano-row,
+        .pca-container,
+        .baseline-grid,
+        .phase-grid,
+        .dreb-intro,
+        .tech-grid {
+          grid-template-columns: 1fr;
+        }
+        .dreb-graphs {
+          grid-template-columns: 1fr;
+        }
+        .enr-content-row td {
+          display: block;
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+      <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+      <img id="lightbox-img" src="" alt="" />
+    </div>
+
+    <nav>
+      <div class="nav-logo">Bioinformatics · Portfolio</div>
+      <div class="nav-links">
+        <a href="#overview">Overview</a>
+        <a href="#pipeline">Pipeline</a>
+        <a href="#global">Global Response</a>
+        <a href="#volcanos">DGE</a>
+        <a href="#enrichment">Enrichment</a>
+        <a href="#dreb">DREB & HSP</a>
+        <a href="#conclusions">Conclusions</a>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-grid"></div>
+      <div class="hero-content">
+        <div class="hero-tag">Transcriptomic Analysis · RNA-seq</div>
+        <h1>
+          Heat Stress Response &<br /><em>Recovery Dynamics</em><br />in
+          <em style="color: var(--accent3)">A. thaliana</em>
+        </h1>
+        <p class="hero-subtitle">
+          Transcriptional reprogramming during acute heat shock and subsequent
+          recovery — a dual-baseline comparative approach across five DGE
+          contrasts.
+        </p>
+        <div class="hero-finding">
+          <strong>Key Finding:</strong> A three-phase adaptation model — DREB2C
+          marks acute stress, DREB1A/B form long-term thermal memory; "two-wave"
+          HSP dynamics reveal the precise molecular choreography from emergency
+          defense to acquired thermotolerance.
+        </div>
+        <div class="tags">
+          <span class="tag tag-bio">Arabidopsis thaliana</span
+          ><span class="tag tag-bio">DREB factors</span
+          ><span class="tag tag-bio">Heat Shock Proteins</span>
+          <span class="tag tag-tool">DESeq2</span
+          ><span class="tag tag-tool">g:Profiler</span
+          ><span class="tag tag-tool">STRING</span>
+          <span class="tag tag-method">RNA-seq</span
+          ><span class="tag tag-method">GO · KEGG</span>
+        </div>
+        <div class="hero-buttons">
+          <a href="#overview" class="btn btn-primary">Explore Project ↓</a>
+          <a
+            href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE118338"
+            target="_blank"
+            class="btn btn-outline"
+            >GEO: GSE118338 ↗</a
+          >
+        </div>
+      </div>
+      <div class="scroll-hint">scroll to explore</div>
+    </div>
+
+    <!-- OVERVIEW -->
+    <section id="overview">
+      <div class="section-label">01 · Overview</div>
+      <h2>Project at a Glance</h2>
+      <p>
+        NCBI GEO: <span class="highlight-text">GSE118338</span> · BioProject
+        PRJNA485260 · 4 conditions · 2 replicates each · 5 DGE comparisons.
+      </p>
+      <div class="cards-grid">
+        <div class="card">
+          <div class="card-value">8</div>
+          <div class="card-label">Samples</div>
+          <div class="card-sub">4 conditions × 2 replicates</div>
+        </div>
+        <div class="card">
+          <div class="card-value">23K+</div>
+          <div class="card-label">Genes</div>
+          <div class="card-sub">TAIR10 reference genome</div>
+        </div>
+        <div class="card">
+          <div class="card-value">90%</div>
+          <div class="card-label">PCA Variance</div>
+          <div class="card-sub">PC1: 56% · PC2: 34%</div>
+        </div>
+        <div class="card">
+          <div class="card-value">5</div>
+          <div class="card-label">DGE Contrasts</div>
+          <div class="card-sub">Dual-baseline strategy</div>
+        </div>
+        <div class="card">
+          <div class="card-value">3</div>
+          <div class="card-label">Phases</div>
+          <div class="card-sub">Shock · Repair · Memory</div>
+        </div>
+        <div class="card">
+          <div class="card-value">DREB</div>
+          <div class="card-label">Focus Family</div>
+          <div class="card-sub">AP2/ERF transcription factors</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PIPELINE -->
+    <section id="pipeline">
+      <div class="section-label">02 · Methods</div>
+      <h2>Analysis Pipeline</h2>
+      <div style="margin: 0.75rem 0 0.4rem">
+        <span
+          style="
+            font-family: &quot;DM Mono&quot;, monospace;
+            font-size: 0.72rem;
+            color: var(--accent);
+            letter-spacing: 0.1em;
+          "
+          >UPSTREAM · GALAXY CLOUD</span
+        >
+      </div>
+      <div class="pipeline">
+        <div class="pipe-step">
+          <div class="pipe-icon">📥</div>
+          <span class="pipe-name">SRA Toolkit</span>
+          <div class="pipe-tool">FASTQ download</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <div class="pipe-icon">🔍</div>
+          <span class="pipe-name">FastQC</span>
+          <div class="pipe-tool">Quality control</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <div class="pipe-icon">📊</div>
+          <span class="pipe-name">MultiQC</span>
+          <div class="pipe-tool">QC aggregation</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <div class="pipe-icon">🧬</div>
+          <span class="pipe-name">STAR</span>
+          <div class="pipe-tool">Read alignment</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <div class="pipe-icon">🔢</div>
+          <span class="pipe-name">featureCounts</span>
+          <div class="pipe-tool">Count matrix</div>
+        </div>
+      </div>
+      <div style="margin: 0.75rem 0 0.4rem">
+        <span
+          style="
+            font-family: &quot;DM Mono&quot;, monospace;
+            font-size: 0.72rem;
+            color: var(--accent3);
+            letter-spacing: 0.1em;
+          "
+          >DOWNSTREAM · R / RSTUDIO</span
+        >
+      </div>
+      <div class="pipeline">
+        <div class="pipe-step">
+          <div class="pipe-icon">📈</div>
+          <span class="pipe-name">DESeq2</span>
+          <div class="pipe-tool">DGE analysis</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <div class="pipe-icon">🌐</div>
+          <span class="pipe-name">g:Profiler</span>
+          <div class="pipe-tool">GO enrichment</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <div class="pipe-icon">🔗</div>
+          <span class="pipe-name">STRING DB</span>
+          <div class="pipe-tool">KEGG pathways</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <div class="pipe-icon">🎨</div>
+          <span class="pipe-name">ggplot2</span>
+          <div class="pipe-tool">Visualization</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <div class="pipe-icon">🗺️</div>
+          <span class="pipe-name">pheatmap</span>
+          <div class="pipe-tool">Heatmaps</div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <h3 style="margin-bottom: 1rem">Dual-Baseline Strategy</h3>
+      <div class="baseline-grid">
+        <div class="baseline-card active">
+          <div class="baseline-title">Baseline 1 · Homeostasis Perspective</div>
+          <div class="baseline-q">
+            "How far is the plant from its resting state?"
+          </div>
+          <div class="baseline-item">
+            <span class="baseline-arrow">→</span
+            ><span
+              ><strong style="color: var(--text)">CTRL → LHS</strong> — Primary
+              stress response</span
+            >
+          </div>
+          <div class="baseline-item">
+            <span class="baseline-arrow">→</span
+            ><span
+              ><strong style="color: var(--text)">CTRL → LHSR12</strong> —
+              "Metabolic debt" at 12h</span
+            >
+          </div>
+          <div class="baseline-item">
+            <span class="baseline-arrow">→</span
+            ><span
+              ><strong style="color: var(--text)">CTRL → LHSR84</strong> —
+              Long-term stress memory</span
+            >
+          </div>
+        </div>
+        <div class="baseline-card">
+          <div class="baseline-title">Baseline 2 · Recovery Trajectory</div>
+          <div class="baseline-q">
+            "How does the cell reorganize from maximum damage?"
+          </div>
+          <div class="baseline-item">
+            <span class="baseline-arrow">→</span
+            ><span
+              ><strong style="color: var(--text)">LHS → LHSR12</strong> — Early
+              repair mechanisms</span
+            >
+          </div>
+          <div class="baseline-item">
+            <span class="baseline-arrow">→</span
+            ><span
+              ><strong style="color: var(--text)">LHS → LHSR84</strong> —
+              Adaptation completion</span
+            >
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GLOBAL -->
+    <section id="global">
+      <div class="section-label">03 · Global Response</div>
+      <h2>PCA & Transcriptomic Landscape</h2>
+      <div class="pca-container">
+        <div>
+          <h3>Principal Component Analysis</h3>
+          <p>
+            PC1 (56%) + PC2 (34%) =
+            <strong style="color: var(--text)">90% of total variance</strong>.
+            Biological replicates cluster perfectly — confirming experimental
+            precision, not technical noise, drives the signal.
+          </p>
+          <p>
+            Trajectory: Control → LHS (acute shift) → LHSR12 (maximum distance =
+            peak repair) → LHSR84 (returns toward Control but stays separated
+            along PC2 — transcriptional stress memory).
+          </p>
+        </div>
+        <div
+          class="img-slot"
+          style="aspect-ratio: 1"
+          onclick="openLightboxEl(this)"
+        >
+          <img src="res/PCA_plot.png" alt="PCA Plot" />
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="pca-container">
+        <div
+          class="img-slot"
+          style="aspect-ratio: 3/4; min-height: 300px"
+          onclick="openLightboxEl(this)"
+        >
+          <img src="res/heatmap.png" alt="" />
+        </div>
+        <div>
+          <h3>Global Hierarchical Clustering</h3>
+          <p>
+            Dendrogram splits:
+            <strong style="color: var(--text)">(Control + LHSR84)</strong> vs
+            <strong style="color: var(--text)">(LHS + LHSR12)</strong> —
+            structurally proving the system largely returns to homeostasis by
+            84h.
+          </p>
+          <p>
+            Three gene clusters: stress-induced (peak at LHS → off at 84h),
+            repair-specific (exclusive to LHSR12), stress-memory (persistent at
+            LHSR84).
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- VOLCANO ROW -->
+    <section id="volcanos">
+      <div class="section-label">04 · Differential Gene Expression</div>
+      <h2>Volcano Plots</h2>
+      <p>
+        Each point = one gene. Red = significant (padj &lt; 0.05 and |log2FC|
+        &gt; 1). Generated with
+        <span class="highlight-text">EnhancedVolcano</span> in R. Click any
+        image to enlarge.
+      </p>
+
+      <div class="volcano-row">
+        <div class="volcano-card">
+          <div class="volcano-img-wrap" onclick="openLightboxEl(this)">
+            <img src="res/volcano_C_LHS.png" alt="LHS vs Control" />
+          </div>
+          <div class="volcano-meta">
+            <div class="volcano-title">LHS vs Control · Acute Heat Stress</div>
+            <div class="volcano-stats">
+              <span class="vstat vstat-total">23,676 genes</span>
+              <span class="vstat vstat-up">↑ 1,775 UP</span>
+              <span class="vstat vstat-down">↓ 2,165 DOWN</span>
+            </div>
+            <div class="volcano-desc">
+              Massive balanced reprogramming. Top marker:
+              <span class="volcano-gene">AT4G27670 (HSP21)</span> at –log₁₀P
+              ~160. Emergency defense activated; photosynthesis and growth
+              halted.
+            </div>
+          </div>
+        </div>
+        <div class="volcano-card">
+          <div class="volcano-img-wrap" onclick="openLightboxEl(this)">
+            <img src="res/volcano_LHS_LHSR12.png" alt="" />
+          </div>
+          <div class="volcano-meta">
+            <div class="volcano-title">
+              LHS vs LHSR12 · Early Recovery (12h)
+            </div>
+            <div class="volcano-stats">
+              <span class="vstat vstat-total">24,632 genes</span>
+              <span class="vstat vstat-up">↑ massive activation</span>
+            </div>
+            <div class="volcano-desc">
+              Most dynamic stage — –log₁₀P ~290, strongly right-skewed.
+              <span class="volcano-gene">AT1G68120</span> leads activation. Cell
+              shifts from defense to molecular repair.
+            </div>
+          </div>
+        </div>
+        <div class="volcano-card">
+          <div class="volcano-img-wrap" onclick="openLightboxEl(this)">
+            <img src="res/volcano_LHS_LHSR84.png" alt="" />
+          </div>
+          <div class="volcano-meta">
+            <div class="volcano-title">LHS vs LHSR84 · Late Recovery (84h)</div>
+            <div class="volcano-stats">
+              <span class="vstat vstat-total">24,632 genes</span>
+              <span class="vstat vstat-up">↑ balanced return</span>
+            </div>
+            <div class="volcano-desc">
+              Balanced return (–log₁₀P ~310).
+              <span class="volcano-gene">AT1G07050</span> fully reactivated.
+              Far-left cluster (log2FC –8 to –10) = stress genes completely
+              normalized. DREB1A/B and HSFA3 appear.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5-PHASE ENRICHMENT -->
+    <section id="enrichment">
+      <div class="section-label">05 · Functional Enrichment</div>
+      <h2>GO & KEGG — 5 DGE Comparisons</h2>
+      <p>
+        Select a comparison, then click
+        <strong style="color: var(--accent)">▲ Upregulated</strong> or
+        <strong style="color: var(--red)">▼ Downregulated</strong> to reveal the
+        dotplots. Each cell shows GO:BP, GO:MF and KEGG side by side.
+      </p>
+
+      <div class="phases-tabs">
+        <div class="phase-tab active" onclick="switchPhase(0)">
+          ① Control → LHS
+        </div>
+        <div class="phase-tab" onclick="switchPhase(1)">② Control → LHSR12</div>
+        <div class="phase-tab" onclick="switchPhase(2)">③ Control → LHSR84</div>
+        <div class="phase-tab" onclick="switchPhase(3)">④ LHS → LHSR12</div>
+        <div class="phase-tab" onclick="switchPhase(4)">⑤ LHS → LHSR84</div>
+        <div class="phase-tab" onclick="switchPhase(5)">⑥ Summary & Key Insights</div>
+      </div>
+
+      <!-- helper macro: each phase follows the same structure -->
+
+      <!-- ① -->
+      <div class="phase-content active" id="phase-0">
+        <div class="phase-info">
+          <span class="phase-badge phase-badge-ctrl">Control</span>
+          <span style="color: var(--muted)">vs</span>
+          <span class="phase-badge phase-badge-stress">LHS · Acute Stress</span>
+        </div>
+        <p style="color: var(--muted); margin-bottom: 1.5rem">
+          <span class="highlight-text">CTRL → LHS</span> | Acute heat stress
+          response
+        </p>
+        <div class="phase-grid">
+          <div>
+            <div class="phase-col-title up">↑ Upregulated processes:</div>
+            <div class="process-item">
+              <span class="dot dot-green"></span>Stress response: abiotic,
+              oxidative, heat, water deprivation
+            </div>
+            <div class="process-item">
+              <span class="dot dot-green"></span>Active transmembrane
+              transporter activity
+            </div>
+            <div class="process-item">
+              <span class="dot dot-green"></span>Biosynthesis of secondary
+              metabolites
+            </div>
+            <div class="process-item">
+              <span class="dot dot-green"></span>Plant hormone signal
+              transduction
+            </div>
+          </div>
+          <div>
+            <div class="phase-col-title down">↓ Downregulated processes:</div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>Photosynthesis (GO:BP, KEGG)
+            </div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>Carbon fixation & reductive
+              pentose-phosphate cycle
+            </div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>Oxidoreductase & peroxidase
+              activity
+            </div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>Starch and sucrose metabolism
+            </div>
+          </div>
+        </div>
+        <table class="enrichment-table">
+          <thead>
+            <tr class="enr-header-row">
+              <th class="col-label"></th>
+              <th class="col-go-bp">GO : Biological Process</th>
+              <th class="col-go-mf">GO : Molecular Function</th>
+              <th class="col-kegg">KEGG Pathways</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="enr-toggle-row up" onclick="toggleEnr(this)">
+              <td class="label-cell">
+                <span class="chevron">▼</span>▲ Upregulated
+              </td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr class="enr-content-row">
+              <td></td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/Control_LHS_GO_BP_UP.png" />
+                </div>
+              </td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/Control_LHS_GO_MF_UP.png" />
+                </div>
+              </td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/Control_LHS_KEGG_UP.png" />
+                </div>
+              </td>
+            </tr>
+            <tr class="enr-toggle-row down" onclick="toggleEnr(this)">
+              <td class="label-cell">
+                <span class="chevron">▼</span>▼ Downregulated
+              </td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr class="enr-content-row">
+              <td></td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/Control_LHS_GO_BP_DOWN.png" />
+                </div>
+              </td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/Control_LHS_GO_MF_DOWN.png" />
+                </div>
+              </td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/Control_LHS_KEGG_DOWN.png" />
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="phase-conclusion">
+          <strong>Conclusion:</strong> Under acute heat stress, the plant
+          diverts resources from photosynthesis and primary metabolism toward
+          multi-layered stress defense, including hormone signaling and
+          secondary metabolite production.
+        </div>
+      </div>
+
+      <!-- ② -->
+      <div class="phase-content" id="phase-1">
+        <div class="phase-info">
+          <span class="phase-badge phase-badge-ctrl">Control</span>
+          <span style="color: var(--muted)">vs</span>
+          <span class="phase-badge phase-badge-rec">LHSR12 · 12h Recovery</span>
+        </div>
+        <p style="color: var(--muted); margin-bottom: 1.5rem">
+          <span class="highlight-text">CTRL → LHSR12</span> | Metabolic debt —
+          what failed to fully recover after 12h
+        </p>
+        <div class="phase-grid">
+          <div>
+            <div class="phase-col-title up">↑ Upregulated processes:</div>
+            <div class="process-item">
+              <span class="dot dot-green"></span>Stress & hypoxia response:
+              response to stress, hypoxia, decreased oxygen levels
+            </div>
+            <div class="process-item">
+              <span class="dot dot-green"></span>Oxidoreductase & monooxygenase
+              activity (heme binding, tetrapyrrole binding)
+            </div>
+            <div class="process-item">
+              <span class="dot dot-green"></span>Biotic interactions: response
+              to other organism, defense response
+            </div>
+            <div class="process-item">
+              <span class="dot dot-green"></span>Biosynthesis of secondary
+              metabolites (KEGG)
+            </div>
+            <div class="process-item">
+              <span class="dot dot-green"></span>Protein processing in
+              endoplasmic reticulum
+            </div>
+          </div>
+          <div>
+            <div class="phase-col-title down">↓ Downregulated processes:</div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>Photosynthesis (GO:BP, KEGG) —
+              light reactions, light harvesting, electron transport chain
+            </div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>Chlorophyll binding &
+              tetrapyrrole binding
+            </div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>Microtubule-based processes &
+              cell motility
+            </div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>Starch and sucrose metabolism
+            </div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>Circadian rhythm
+            </div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>Phenylpropanoid biosynthesis
+            </div>
+          </div>
+        </div>
+        <table class="enrichment-table">
+          <thead>
+            <tr class="enr-header-row">
+              <th class="col-label"></th>
+              <th class="col-go-bp">GO : Biological Process</th>
+              <th class="col-go-mf">GO : Molecular Function</th>
+              <th class="col-kegg">KEGG Pathways</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="enr-toggle-row up" onclick="toggleEnr(this)">
+              <td class="label-cell">
+                <span class="chevron">▼</span>▲ Upregulated
+              </td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr class="enr-content-row">
+              <td></td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/Control_LHSR12_GO_BP_UP.png" />
+                </div>
+              </td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/Control_LHSR12_GO_MF_UP.png" />
+                </div>
+              </td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/Control_LHSR12_KEGG_UP.png" />
+                </div>
+              </td>
+            </tr>
+            <tr class="enr-toggle-row down" onclick="toggleEnr(this)">
+              <td class="label-cell">
+                <span class="chevron">▼</span>▼ Downregulated
+              </td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr class="enr-content-row">
+              <td></td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/Control_LHSR12_GO_BP_DOWN.png" />
+                </div>
+              </td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/Control_LHSR12_GO_MF_DOWN.png" />
+                </div>
+              </td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/Control_LHSR12_KEGG_DOWN.png" />
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="phase-conclusion">
+          <strong>Conclusion — Metabolic Debt:</strong> 12 hours after stress
+          removal, photosynthetic machinery and circadian regulation remain
+          strongly suppressed, while hypoxia-response and defense pathways stay
+          active — indicating incomplete metabolic recovery and persistent
+          cellular "memory" of the stress event.
+        </div>
+      </div>
+
+      <!-- ③ -->
+      <div class="phase-content" id="phase-2">
+        <div class="phase-info">
+          <span class="phase-badge phase-badge-ctrl">Control</span
+          ><span style="color: var(--muted)">vs</span
+          ><span class="phase-badge phase-badge-rec"
+            >LHSR84 · 84h Recovery</span
+          >
+        </div>
+        <p style="color: var(--muted); margin-bottom: 1.5rem">
+          <span class="highlight-text">CTRL → LHSR84</span> | Long-term stress
+          memory — what remains altered after complete visual recovery
+        </p>
+        <div class="phase-grid">
+          <div>
+            <div class="phase-col-title up">↑ Upregulated processes:</div>
+            <div class="process-item">
+              <span class="dot dot-green"></span>Persistent stress & hypoxia
+              response (stress, stimulus, oxygen levels, hypoxia)
+            </div>
+            <div class="process-item">
+              <span class="dot dot-green"></span>Biotic defense: response to
+              other organism, plant-pathogen interaction (KEGG)
+            </div>
+            <div class="process-item">
+              <span class="dot dot-green"></span>Expanded secondary metabolism:
+              biosynthesis of secondary metabolites, phenylpropanoid,
+              flavone/flavonoid, isoquinoline alkaloid, tryptophan,
+              alpha-linolenic acid, glutathione, sulfur metabolism
+            </div>
+            <div class="process-item">
+              <span class="dot dot-green"></span>MAPK signaling pathway (plant
+              stress signaling)
+            </div>
+            <div class="process-item">
+              <span class="dot dot-green"></span>Glucosinolate biosynthesis
+            </div>
+          </div>
+          <div>
+            <div class="phase-col-title down">↓ Downregulated processes:</div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>Photosynthesis: light harvesting,
+              light reactions, antenna proteins — still suppressed at 84h
+            </div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>Chlorophyll & tetrapyrrole
+              binding
+            </div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>Circadian rhythm (plant)
+            </div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>Water channel & transmembrane
+              transport activity
+            </div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>Sesquiterpenoid and triterpenoid
+              biosynthesis
+            </div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>mRNA binding; single-stranded RNA
+              binding
+            </div>
+          </div>
+        </div>
+        <table class="enrichment-table">
+          <thead>
+            <tr class="enr-header-row">
+              <th class="col-label"></th>
+              <th class="col-go-bp">GO : Biological Process</th>
+              <th class="col-go-mf">GO : Molecular Function</th>
+              <th class="col-kegg">KEGG Pathways</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="enr-toggle-row up" onclick="toggleEnr(this)">
+              <td class="label-cell">
+                <span class="chevron">▼</span>▲ Upregulated
+              </td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr class="enr-content-row">
+              <td></td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/Control_LHSR84_GO_BP_UP.png" />
+                </div>
+              </td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/Control_LHSR84_GO_MF_UP.png" />
+                </div>
+              </td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/Control_LHSR84_KEGG_UP.png" />
+                </div>
+              </td>
+            </tr>
+            <tr class="enr-toggle-row down" onclick="toggleEnr(this)">
+              <td class="label-cell">
+                <span class="chevron">▼</span>▼ Downregulated
+              </td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr class="enr-content-row">
+              <td></td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/Control_LHSR84_GO_BP_DOWN.png" />
+                </div>
+              </td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/Control_LHSR84_GO_MF_DOWN.png" />
+                </div>
+              </td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/Control_LHSR84_KEGG_DOWN.png" />
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="phase-conclusion">
+          <strong>Conclusion — Stress Memory:</strong> Even after 84 hours of
+          recovery, the plant retains a broad stress "memory": photosynthesis
+          and circadian regulation remain suppressed, while secondary defense
+          metabolism (flavonoids, alkaloids, MAPK signaling) stays persistently
+          upregulated — suggesting long-term epigenetic or transcriptional
+          reprogramming rather than full homeostatic reset.
+        </div>
+      </div>
+
+      <!-- ④ -->
+      <div class="phase-content" id="phase-3">
+        <div class="phase-info">
+          <span class="phase-badge phase-badge-stress">LHS</span
+          ><span style="color: var(--muted)">vs</span
+          ><span class="phase-badge phase-badge-rec"
+            >LHSR12 · Early Repair</span
+          >
+        </div>
+        <p style="color: var(--muted); margin-bottom: 1.5rem">
+          <span class="highlight-text">LHS → LHSR12</span> | Early repair
+          mechanisms — what switches off and what switches on in the first 12h
+        </p>
+        <div class="phase-grid">
+          <div>
+            <div class="phase-col-title up">↑ Upregulated processes:</div>
+            <div class="process-item">
+              <span class="dot dot-green"></span>RNA processing & metabolism:
+              RNA modification, RNA splicing, mRNA processing, rRNA processing,
+              ribosome biogenesis
+            </div>
+            <div class="process-item">
+              <span class="dot dot-green"></span>Protein quality control:
+              protein folding chaperones (ATP-dependent), unfolded protein
+              binding
+            </div>
+            <div class="process-item">
+              <span class="dot dot-green"></span>DNA repair & genome stability:
+              homologous recombination, nucleotide excision repair
+            </div>
+            <div class="process-item">
+              <span class="dot dot-green"></span>RNA machinery: spliceosome, RNA
+              polymerase, RNA transport, RNA degradation
+            </div>
+            <div class="process-item">
+              <span class="dot dot-green"></span>Nucleic acid metabolic process
+            </div>
+          </div>
+          <div>
+            <div class="phase-col-title down">↓ Downregulated processes:</div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>Secondary metabolism & defense:
+              secondary metabolic process, phenylpropanoid, glucosinolate,
+              biosynthesis of secondary metabolites
+            </div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>Biotic stress response: response
+              to bacterium, salicylic acid, wounding, toxic substance
+            </div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>Oxidoreductase & peroxidase
+              activity (tetrapyrrole, heme binding)
+            </div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>Plant hormone signal transduction
+            </div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>Detoxification & toxin catabolic
+              processes
+            </div>
+          </div>
+        </div>
+        <table class="enrichment-table">
+          <thead>
+            <tr class="enr-header-row">
+              <th class="col-label"></th>
+              <th class="col-go-bp">GO : Biological Process</th>
+              <th class="col-go-mf">GO : Molecular Function</th>
+              <th class="col-kegg">KEGG Pathways</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="enr-toggle-row up" onclick="toggleEnr(this)">
+              <td class="label-cell">
+                <span class="chevron">▼</span>▲ Upregulated vs stress
+              </td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr class="enr-content-row">
+              <td></td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/LHS_LHSR12_GO_BP_UP.png" />
+                </div>
+              </td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/LHS_LHSR12_GO_MF_UP.png" />
+                </div>
+              </td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/LHS_LHSR12_KEGG_UP.png" />
+                </div>
+              </td>
+            </tr>
+            <tr class="enr-toggle-row down" onclick="toggleEnr(this)">
+              <td class="label-cell">
+                <span class="chevron">▼</span>▼ Downregulated vs stress
+              </td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr class="enr-content-row">
+              <td></td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/LHS_LHSR12_GO_BP_DOWN.png" />
+                </div>
+              </td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/LHS_LHSR12_GO_MF_DOWN.png" />
+                </div>
+              </td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/LHS_LHSR12_KEGG_DOWN.png" />
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="phase-conclusion">
+          <strong>Conclusion — Molecular Repair Peak:</strong> The transition
+          from acute stress to early recovery is marked by a massive activation
+          of RNA processing and protein quality control machinery — the cell
+          prioritizes rebuilding its translational apparatus and repairing DNA
+          damage, while simultaneously downregulating the acute defense and
+          secondary metabolism programs that were active during stress.
+        </div>
+      </div>
+
+      <!-- ⑤ -->
+      <div class="phase-content" id="phase-4">
+        <div class="phase-info">
+          <span class="phase-badge phase-badge-stress">LHS</span
+          ><span style="color: var(--muted)">vs</span
+          ><span class="phase-badge phase-badge-rec"
+            >LHSR84 · Late Adaptation</span
+          >
+        </div>
+        <p style="color: var(--muted); margin-bottom: 1.5rem">
+          <span class="highlight-text">LHS → LHSR84</span> | Adaptation
+          completion — full attenuation of acute stress and restart of basal
+          metabolism
+        </p>
+        <div class="phase-grid">
+          <div>
+            <div class="phase-col-title up">↑ Upregulated processes:</div>
+            <div class="process-item">
+              <span class="dot dot-green"></span>Photosynthesis fully restored:
+              light reactions, light harvesting, photosystem I, electron
+              transport chain
+            </div>
+            <div class="process-item">
+              <span class="dot dot-green"></span>Microtubule-based processes &
+              cell motility (cytoskeleton reconstruction)
+            </div>
+            <div class="process-item">
+              <span class="dot dot-green"></span>Chlorophyll & tetrapyrrole
+              binding; carbohydrate binding
+            </div>
+            <div class="process-item">
+              <span class="dot dot-green"></span>Generation of precursor
+              metabolites & energy
+            </div>
+            <div class="process-item">
+              <span class="dot dot-green"></span>Rhythmic process; response to
+              temperature stimulus
+            </div>
+            <div class="process-item">
+              <span class="dot dot-green"></span>Starch and sucrose metabolism
+              (KEGG)
+            </div>
+            <div class="process-item">
+              <span class="dot dot-green"></span>Phenylpropanoid biosynthesis
+            </div>
+          </div>
+          <div>
+            <div class="phase-col-title down">↓ Downregulated processes:</div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>Hypoxia & oxygen stress response
+              (fully attenuated)
+            </div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>Secondary metabolite biosynthesis
+              & defense (salicylic acid, bacterium, oxidative stress)
+            </div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>ABC-type xenobiotic transporter
+              activity
+            </div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>Glutathione transferase &
+              monooxygenase activity
+            </div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>Strictosidine synthase activity;
+              cysteine/methionine metabolism
+            </div>
+            <div class="process-item">
+              <span class="dot dot-red"></span>Protein processing in endoplasmic
+              reticulum
+            </div>
+          </div>
+        </div>
+        <table class="enrichment-table">
+          <thead>
+            <tr class="enr-header-row">
+              <th class="col-label"></th>
+              <th class="col-go-bp">GO : Biological Process</th>
+              <th class="col-go-mf">GO : Molecular Function</th>
+              <th class="col-kegg">KEGG Pathways</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="enr-toggle-row up" onclick="toggleEnr(this)">
+              <td class="label-cell">
+                <span class="chevron">▼</span>▲ Upregulated vs stress
+              </td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr class="enr-content-row">
+              <td></td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/LHS_LHSR84_GO_BP_UP.png" />
+                </div>
+              </td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/LHS_LHSR84_GO_MF_UP.png" />
+                </div>
+              </td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/LHS_LHSR84_KEGG_UP.png" />
+                </div>
+              </td>
+            </tr>
+            <tr class="enr-toggle-row down" onclick="toggleEnr(this)">
+              <td class="label-cell">
+                <span class="chevron">▼</span>▼ Downregulated vs stress
+              </td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr class="enr-content-row">
+              <td></td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/LHS_LHSR84_GO_BP_DOWN.png" />
+                </div>
+              </td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/LHS_LHSR84_GO_MF_DOWN.png" />
+                </div>
+              </td>
+              <td>
+                <div class="enr-graph" onclick="openLightboxEl(this)">
+                  <img src="res/LHS_LHSR84_KEGG_DOWN.png" />
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="phase-conclusion">
+          <strong>Conclusion — Photosynthetic Reactivation & Memory:</strong>
+          By 84 hours post-stress, the acute stress program is fully resolved:
+          photosynthetic capacity, microtubule dynamics, and energy metabolism
+          are restored to pre-stress levels, while hypoxia and xenobiotic
+          defense pathways are completely switched off — indicating successful
+          long-term adaptation and functional recovery.
+        </div>
+      </div>
+
+      <!-- ⑥ -->
+      <div class="phase-content" id="phase-5">
+      <!-- ── GO & KEGG GENERAL CONCLUSION ── -->
+
+        <!-- Three summary cards -->
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+          "
+        >
+          <div style="background: var(--bg2); padding: 1.5rem">
+            <div
+              style="
+                font-family: &quot;DM Mono&quot;, monospace;
+                font-size: 0.7rem;
+                color: var(--accent2);
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                margin-bottom: 0.75rem;
+              "
+            >
+              🔥 Phase 1 · Acute Stress
+            </div>
+            <div
+              style="
+                font-size: 0.83rem;
+                color: var(--text);
+                font-weight: 500;
+                margin-bottom: 0.5rem;
+              "
+            >
+              Emergency Defense Program
+            </div>
+            <p style="font-size: 0.82rem; color: var(--muted); margin: 0">
+              GO reveals activation of
+              <strong style="color: var(--text)"
+                >response to abiotic stress</strong
+              >, ROS detoxification and hormonal signaling (ABA, JA, SA). KEGG
+              confirms:
+              <strong style="color: var(--text)"
+                >Plant hormone signal transduction</strong
+              >
+              and
+              <strong style="color: var(--text)"
+                >Protein processing in ER</strong
+              >
+              — rapid chaperone mobilization to prevent protein misfolding.
+              Photosynthesis, cell cycle and cytoskeleton are systematically
+              repressed.
+            </p>
+          </div>
+
+          <div
+            style="
+              background: var(--bg2);
+              padding: 1.5rem;
+              border-left: 1px solid var(--border);
+            "
+          >
+            <div
+              style="
+                font-family: &quot;DM Mono&quot;, monospace;
+                font-size: 0.7rem;
+                color: var(--accent3);
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                margin-bottom: 0.75rem;
+              "
+            >
+              🛠 Phase 2 · Repair (12h)
+            </div>
+            <div
+              style="
+                font-size: 0.83rem;
+                color: var(--text);
+                font-weight: 500;
+                margin-bottom: 0.5rem;
+              "
+            >
+              Molecular Reconstruction Peak
+            </div>
+            <p style="font-size: 0.82rem; color: var(--muted); margin: 0">
+              GO:BP shows peak enrichment of
+              <strong style="color: var(--text)">RNA modification</strong>
+              (p=6×10⁻⁵²),
+              <strong style="color: var(--text)">ribosome biogenesis</strong>
+              and <strong style="color: var(--text)">protein folding</strong>.
+              KEGG: <strong style="color: var(--text)">Spliceosome</strong> and
+              <strong style="color: var(--text)"
+                >Starch and sucrose metabolism</strong
+              >
+              activated to generate rapid energy for cellular triage.
+              Photosynthesis and secondary metabolism remain deeply suppressed
+              to conserve resources for repair.
+            </p>
+          </div>
+
+          <div
+            style="
+              background: var(--bg2);
+              padding: 1.5rem;
+              border-left: 1px solid var(--border);
+            "
+          >
+            <div
+              style="
+                font-family: &quot;DM Mono&quot;, monospace;
+                font-size: 0.7rem;
+                color: var(--accent);
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                margin-bottom: 0.75rem;
+              "
+            >
+              🌱 Phase 3 · Adaptation (84h)
+            </div>
+            <div
+              style="
+                font-size: 0.83rem;
+                color: var(--text);
+                font-weight: 500;
+                margin-bottom: 0.5rem;
+              "
+            >
+              Reactivation & Stress Memory
+            </div>
+            <p style="font-size: 0.82rem; color: var(--muted); margin: 0">
+              GO:CC dominated by
+              <strong style="color: var(--text)">thylakoid</strong>
+              (p=1.2×10⁻⁴⁰) and
+              <strong style="color: var(--text)">photosystem I/II</strong> —
+              chloroplast structurally restored. KEGG confirms:
+              <strong style="color: var(--text)"
+                >alpha-Linolenic acid metabolism</strong
+              >
+              (JA precursor) and
+              <strong style="color: var(--text)">MAPK signaling</strong> provide
+              molecular evidence of Acquired Thermotolerance. Circadian rhythm
+              partially recovering.
+            </p>
+          </div>
+        </div>
+
+        <!-- The Biological Bottom Line -->
+        <div
+          style="
+            background: var(--bg2);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            border-radius: 4px;
+            padding: 1.75rem;
+            margin-bottom: 1.5rem;
+          "
+        >
+          <div
+            style="
+              font-family: &quot;DM Mono&quot;, monospace;
+              font-size: 0.72rem;
+              color: var(--accent3);
+              letter-spacing: 0.1em;
+              text-transform: uppercase;
+              margin-bottom: 1rem;
+            "
+          >
+            The Biological Bottom Line
+          </div>
+          <p
+            style="
+              color: var(--text);
+              font-size: 0.9rem;
+              line-height: 1.85;
+              margin: 0;
+            "
+          >
+            The plant strictly separates
+            <strong>molecular repair from physiological growth</strong>. It
+            first funnels all available energy into fixing broken RNA and
+            proteins at 12h, deliberately suppressing defense and
+            photosynthesis. Only when the internal machinery is structurally
+            sound does the plant restart its chloroplasts and invest in
+            long-term stress memory at 84h. Despite recovery relative to LHS,
+            comparison with Control conditions shows that
+            <strong>full restoration is not achieved</strong> — at 84h, the
+            plant exhibits a partially recovered but still stress-adapted
+            transcriptional profile, with incomplete normalization of
+            photosynthesis and regulatory processes. Recovery is relative to
+            stress, not a return to baseline — indicating a
+            <strong>long-term reprogrammed state</strong> rather than full
+            physiological restoration.
+          </p>
+        </div>
+
+        <!-- Recovery paradox highlight -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem">
+          <div
+            style="
+              background: var(--bg2);
+              border: 1px solid var(--border);
+              border-radius: 4px;
+              padding: 1.25rem;
+              border-left: 3px solid var(--accent2);
+            "
+          >
+            <div
+              style="
+                font-family: &quot;DM Mono&quot;, monospace;
+                font-size: 0.72rem;
+                color: var(--accent2);
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                margin-bottom: 0.6rem;
+              "
+            >
+              ⚠ Recovery Paradox
+            </div>
+            <p style="font-size: 0.83rem; color: var(--muted); margin: 0">
+              Even at 84h, GO and KEGG show that
+              <strong style="color: var(--text)">Photosynthesis</strong> and
+              <strong style="color: var(--text)">Circadian rhythm</strong>
+              remain significantly downregulated vs Control. The plant
+              deliberately delays full physiological normalization to maintain a
+              protective, energy-conservative state.
+            </p>
+          </div>
+          <div
+            style="
+              background: var(--bg2);
+              border: 1px solid var(--border);
+              border-radius: 4px;
+              padding: 1.25rem;
+              border-left: 3px solid var(--accent);
+            "
+          >
+            <div
+              style="
+                font-family: &quot;DM Mono&quot;, monospace;
+                font-size: 0.72rem;
+                color: var(--accent);
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                margin-bottom: 0.6rem;
+              "
+            >
+              ✓ Key KEGG Signature Pathways
+            </div>
+            <p style="font-size: 0.83rem; color: var(--muted); margin: 0">
+              <strong style="color: var(--text)"
+                >Protein processing in ER</strong
+              >
+              — peaks at stress and 12h repair, subsides at 84h ·
+              <strong style="color: var(--text)">Photosynthesis</strong> —
+              suppressed throughout, reactivates only relative to stress ·
+              <strong style="color: var(--text)">MAPK signaling</strong> —
+              marker of long-term thermotolerance at 84h.
+            </p>
+          </div>
+        </div>
+      </div>
+      </div>
+    </section>
+
+    <!-- DREB -->
+    <section id="dreb">
+      <div class="section-label">06 · Deep Dive</div>
+      <h2>DREB & HSP Gene Family Dynamics</h2>
+      <p>
+        DREBs (AP2/ERF transcription factors) — key regulators of abiotic
+        stress. HSPs — molecular chaperones ensuring protein stability.
+        VST-normalized counts, sequential contrasts, Z-score clustered heatmaps.
+      </p>
+      <div class="dreb-intro">
+        <div>
+          <div class="dreb-highlight">
+            <h4>Conclusion 1 · Temporal Specialization</h4>
+            <p>
+              DREB2C activates at acute stress, DREB2A/2B coordinate early
+              recovery (12h), and DREB1A/1B exclusively mark late recovery and
+              stress memory formation (84h).
+            </p>
+          </div>
+          <div class="dreb-highlight">
+            <h4>Conclusion 2 · Biphasic Regulation Model</h4>
+            <p>
+              Phase 1: DREB2 subgroup + small HSPs + HSP101 — emergency. Phase
+              2: DREB1 subgroup + HSFA3 — molecular signature of acquired
+              thermotolerance.
+            </p>
+          </div>
+          <div class="dreb-highlight">
+            <h4>Conclusion 3 · DREB–Chaperone Coordination</h4>
+            <p>
+              DREB2C correlates with small HSP activity during stress. DREB1A/B
+              activation at 84h synchronized with HSFA3 induction and HSP
+              shutdown — shared DREB–HSF regulatory axis.
+            </p>
+          </div>
+          <div class="dreb-highlight">
+            <h4>Conclusion 4 · DREB as Phase Markers</h4>
+            <p>
+              DREB2C → acute stress · DREB2A/2B → early recovery · DREB1A/1B →
+              late adaptation & thermal memory.
+            </p>
+          </div>
+        </div>
+        <div>
+          <div class="gene-table">
+            <div class="gene-table-title">
+              Significant DREB — Control vs LHS
+            </div>
+            <div class="gene-row">
+              <span class="gene-name">DREB2C</span
+              ><span class="gene-lfc">+1.27 ↑</span>
+            </div>
+            <div class="gene-row">
+              <span class="gene-name">DREB4</span
+              ><span class="gene-lfc">+1.24 ↑</span>
+            </div>
+          </div>
+          <div class="gene-table">
+            <div class="gene-table-title">Top HSP — Control vs LHS</div>
+            <div class="gene-row">
+              <span class="gene-name">HSP21</span
+              ><span class="gene-lfc">+7.67 ↑</span>
+            </div>
+            <div class="gene-row">
+              <span class="gene-name">HSP17.6B</span
+              ><span class="gene-lfc">+5.61 ↑</span>
+            </div>
+            <div class="gene-row">
+              <span class="gene-name">HSP17.6A</span
+              ><span class="gene-lfc">+4.84 ↑</span>
+            </div>
+            <div class="gene-row">
+              <span class="gene-name">HSP70-3</span
+              ><span class="gene-lfc neg">−1.15 ↓</span>
+            </div>
+            <div class="gene-row">
+              <span class="gene-name">HSFA1D</span
+              ><span class="gene-lfc neg">−1.67 ↓</span>
+            </div>
+          </div>
+          <div class="gene-table">
+            <div class="gene-table-title">Memory markers — LHSR84 vs LHS</div>
+            <div class="gene-row">
+              <span class="gene-name">DREB1A</span
+              ><span class="gene-lfc">+4.49 ↑</span>
+            </div>
+            <div class="gene-row">
+              <span class="gene-name">HSFA3</span
+              ><span class="gene-lfc">+4.88 ↑</span>
+            </div>
+            <div class="gene-row">
+              <span class="gene-name">HSP21</span
+              ><span class="gene-lfc neg">−8.62 ↓</span>
+            </div>
+            <div class="gene-row">
+              <span class="gene-name">HSP17.6B</span
+              ><span class="gene-lfc neg">−7.39 ↓</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="dreb-graphs">
+        <div class="dreb-graph-full">
+          <div
+            class="img-slot"
+            style="min-height: 380px"
+            onclick="openLightboxEl(this)"
+          >
+            <img src="res/DREB_HSP_C_LHSR.png" alt="" />
+          </div>
+        </div>
+        <div
+          class="img-slot"
+          style="min-height: 300px"
+          onclick="openLightboxEl(this)"
+        >
+          <img src="res/Heatmap_LHS_LHSR.png" alt="" />
+        </div>
+        <div
+          class="img-slot"
+          style="min-height: 300px"
+          onclick="openLightboxEl(this)"
+        >
+          <img src="res/Heatmap_C_LHSR.png" alt="" />
+        </div>
+      </div>
+    </section>
+
+    <!-- CONCLUSIONS -->
+    <section id="conclusions">
+      <div class="section-label">07 · Summary</div>
+      <h2>The Three-Phase Adaptation Model</h2>
+      <table class="phase-table">
+        <thead>
+          <tr>
+            <th>Biological System</th>
+            <th>🔥 Shock (LHS)</th>
+            <th>🛠 Repair (12h)</th>
+            <th>🌱 Adaptation (84h)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Photosynthesis</td>
+            <td><span class="status status-red">● Critical Halt</span></td>
+            <td><span class="status status-red">● Still Off</span></td>
+            <td><span class="status status-yellow">● Slow Recovery</span></td>
+          </tr>
+          <tr>
+            <td>Emergency Defense (HSP/ROS)</td>
+            <td><span class="status status-green">● Maximum Alert</span></td>
+            <td><span class="status status-yellow">● Fading</span></td>
+            <td><span class="status status-green">● Stress Memory</span></td>
+          </tr>
+          <tr>
+            <td>Molecular Repair (RNA/Proteins)</td>
+            <td><span class="status status-red">● Paused</span></td>
+            <td><span class="status status-green">● Hyperactive</span></td>
+            <td><span class="status status-green">● Normalized</span></td>
+          </tr>
+          <tr>
+            <td>Growth & Cell Cycle</td>
+            <td><span class="status status-red">● Arrested</span></td>
+            <td><span class="status status-red">● Still Stopped</span></td>
+            <td><span class="status status-green">● Restarting</span></td>
+          </tr>
+          <tr>
+            <td>Circadian Rhythms</td>
+            <td><span class="status status-red">● Disrupted</span></td>
+            <td><span class="status status-red">● Disrupted</span></td>
+            <td><span class="status status-yellow">● Recovering</span></td>
+          </tr>
+          <tr>
+            <td>DREB Factors</td>
+            <td><span class="status status-green">● DREB2C active</span></td>
+            <td><span class="status status-green">● DREB2A/2B peak</span></td>
+            <td><span class="status status-green">● DREB1A/1B memory</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div
+        style="
+          margin-top: 2rem;
+          background: var(--bg2);
+          border: 1px solid rgba(74, 222, 128, 0.2);
+          border-radius: 4px;
+          padding: 1.75rem;
+        "
+      >
+        <div
+          style="
+            font-family: &quot;DM Mono&quot;, monospace;
+            font-size: 0.72rem;
+            color: var(--accent);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+          "
+        >
+          Overall Conclusion
+        </div>
+        <p style="color: var(--text); font-size: 0.9rem; line-height: 1.8">
+          Functional analysis of DREB genes in
+          <em>Arabidopsis thaliana</em> revealed clear temporal and functional
+          specialization. DREB2C activates directly under heat stress,
+          coordinating induction of HSP21, HSP17.6A/B and HSP101. Early recovery
+          (12h) is dominated by DREB2A and DREB2B. Late recovery (84h) is
+          characterized by the unique activation of
+          <strong>DREB1A and DREB1B simultaneously with HSFA3</strong> — the
+          molecular signature of completed cellular recovery and stress memory
+          formation. The synchronous shutdown of small HSPs and DREB1/HSFA3
+          activation at 84h confirm the central role of DREB factors in
+          coordinating the multistep molecular recovery program in
+          <em>Arabidopsis thaliana</em>.
+        </p>
+      </div>
+    </section>
+
+    <!-- TECH -->
+    <section>
+      <div class="section-label">08 · Technology</div>
+      <h2>Tools & Skills</h2>
+      <div class="tech-grid">
+        <div class="tech-group">
+          <div class="tech-group-title">Cloud Pipeline · Galaxy</div>
+          <div class="tech-item">
+            <span class="tech-dot"></span>SRA Toolkit — data retrieval
+          </div>
+          <div class="tech-item">
+            <span class="tech-dot"></span>FastQC / MultiQC — QC
+          </div>
+          <div class="tech-item">
+            <span class="tech-dot"></span>STAR — TAIR10 alignment
+          </div>
+          <div class="tech-item">
+            <span class="tech-dot"></span>featureCounts — quantification
+          </div>
+        </div>
+        <div class="tech-group">
+          <div class="tech-group-title">Statistical Analysis · R</div>
+          <div class="tech-item">
+            <span class="tech-dot" style="background: var(--accent3)"></span
+            >DESeq2 — DGE, VST normalization
+          </div>
+          <div class="tech-item">
+            <span class="tech-dot" style="background: var(--accent3)"></span
+            >tidyverse — data manipulation
+          </div>
+          <div class="tech-item">
+            <span class="tech-dot" style="background: var(--accent3)"></span
+            >EnhancedVolcano — volcano plots
+          </div>
+          <div class="tech-item">
+            <span class="tech-dot" style="background: var(--accent3)"></span
+            >pheatmap — hierarchical clustering
+          </div>
+          <div class="tech-item">
+            <span class="tech-dot" style="background: var(--accent3)"></span
+            >ggplot2 / cowplot — publication plots
+          </div>
+        </div>
+        <div class="tech-group">
+          <div class="tech-group-title">Functional Analysis</div>
+          <div class="tech-item">
+            <span class="tech-dot" style="background: var(--accent2)"></span
+            >g:Profiler — GO:BP / MF / CC
+          </div>
+          <div class="tech-item">
+            <span class="tech-dot" style="background: var(--accent2)"></span
+            >STRING DB — KEGG pathways
+          </div>
+          <div class="tech-item">
+            <span class="tech-dot" style="background: var(--accent2)"></span
+            >Dual-baseline DGE strategy
+          </div>
+          <div class="tech-item">
+            <span class="tech-dot" style="background: var(--accent2)"></span
+            >Protein interaction networks
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="links-section">
+      <div
+        style="
+          font-family: &quot;DM Mono&quot;, monospace;
+          font-size: 0.72rem;
+          color: var(--muted);
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+        "
+      >
+        Dataset & Resources
+      </div>
+      <div class="links-row">
+        <a
+          href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE118338"
+          target="_blank"
+          class="btn btn-outline"
+          >GEO: GSE118338 ↗</a
+        >
+        <a href="#" class="btn btn-outline">GitHub Repository ↗</a>
+        <a href="RNA-seq_portfolio.pdf" class="btn btn-primary"
+          >Download Full PDF ↗</a
+        >
+      </div>
+      <p style="margin-top: 2rem; font-size: 0.8rem; color: var(--dim)">
+        Arabidopsis thaliana · Heat Stress Transcriptomics · RNA-seq · 2026
+      </p>
+    </div>
+
+    <script>
+      function switchPhase(idx) {
+        document
+          .querySelectorAll(".phase-tab")
+          .forEach((t, i) => t.classList.toggle("active", i === idx));
+        document
+          .querySelectorAll(".phase-content")
+          .forEach((c, i) => c.classList.toggle("active", i === idx));
+      }
+      function toggleEnr(row) {
+        const next = row.nextElementSibling;
+        const ch = row.querySelector(".chevron");
+        const open = next.classList.contains("open");
+        next.classList.toggle("open", !open);
+        ch.classList.toggle("open", !open);
+      }
+      function openLightboxEl(el) {
+        const img = el.querySelector("img");
+        if (!img) return;
+        document.getElementById("lightbox-img").src = img.src;
+        document.getElementById("lightbox").classList.add("open");
+      }
+      function closeLightbox() {
+        document.getElementById("lightbox").classList.remove("open");
+      }
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeLightbox();
+      });
+      document.querySelectorAll('a[href^="#"]').forEach((a) => {
+        a.addEventListener("click", (e) => {
+          const t = document.querySelector(a.getAttribute("href"));
+          if (t) {
+            e.preventDefault();
+            window.scrollTo({ top: t.offsetTop - 70, behavior: "smooth" });
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
