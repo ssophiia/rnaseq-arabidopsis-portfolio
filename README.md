@@ -18,4 +18,4 @@ Open portfolio_arabidopsis.html in any modern web browser.
 https://saad-mhmd.github.io/rnaseq-arabidopsis-portfolio/
 
 ## Author
-Sofia YUZKIV
+Sofiia YUZKIV
