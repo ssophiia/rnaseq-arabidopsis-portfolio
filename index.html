@@ -1131,7 +1131,7 @@
         <a href="#global">Global Response</a>
         <a href="#volcanos">DGE</a>
         <a href="#enrichment">Enrichment</a>
-        <a href="#dreb">DREB & HSP</a>
+        <a href="#dreb">HSF–HSP Cascade</a>
         <a href="#conclusions">Conclusions</a>
       </div>
     </nav>
@@ -1151,15 +1151,17 @@
           contrasts.
         </p>
         <div class="hero-finding">
-          <strong>Key Finding:</strong> A three-phase adaptation model — DREB2C
-          marks acute stress, DREB1A/B form long-term thermal memory; "two-wave"
-          HSP dynamics reveal the precise molecular choreography from emergency
-          defense to acquired thermotolerance.
+          <strong>Key Finding:</strong> The HSF–HSP heat-shock cascade dominates the
+          heat stress response — 43 genes across 3 families, with small HSPs reaching
+          up to 465× upregulation (log₂FC 8.86). HSP expression paradoxically
+          <em>peaks at 12h recovery</em>, not during stress — revealing prolonged
+          proteostasis maintenance and DREB-mediated cross-talk with osmotic signaling.
         </div>
         <div class="tags">
           <span class="tag tag-bio">Arabidopsis thaliana</span
-          ><span class="tag tag-bio">DREB factors</span
-          ><span class="tag tag-bio">Heat Shock Proteins</span>
+          ><span class="tag tag-bio">HSF Regulators</span
+          ><span class="tag tag-bio">Heat Shock Proteins</span
+          ><span class="tag tag-bio">DREB Cross-Talk</span>
           <span class="tag tag-tool">DESeq2</span
           ><span class="tag tag-tool">g:Profiler</span
           ><span class="tag tag-tool">STRING</span>
@@ -1214,9 +1216,9 @@
           <div class="card-sub">Shock · Repair · Memory</div>
         </div>
         <div class="card">
-          <div class="card-value">DREB</div>
-          <div class="card-label">Focus Family</div>
-          <div class="card-sub">AP2/ERF transcription factors</div>
+          <div class="card-value">43</div>
+          <div class="card-label">Stress Genes</div>
+          <div class="card-sub">9 DREB · 10 HSF · 24 HSP</div>
         </div>
       </div>
     </section>
@@ -1275,7 +1277,7 @@
             color: var(--accent3);
             letter-spacing: 0.1em;
           "
-          >DOWNSTREAM · R / RSTUDIO</span
+          >DOWNSTREAM · R / RSTUDIO + WSL</span
         >
       </div>
       <div class="pipeline">
@@ -1283,6 +1285,12 @@
           <div class="pipe-icon">📈</div>
           <span class="pipe-name">DESeq2</span>
           <div class="pipe-tool">DGE analysis</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <div class="pipe-icon">🏷️</div>
+          <span class="pipe-name">AnnotationDbi</span>
+          <div class="pipe-tool">Gene annotation · org.At.tair.db</div>
         </div>
         <div class="pipe-arrow">→</div>
         <div class="pipe-step">
@@ -1309,6 +1317,29 @@
           <div class="pipe-tool">Heatmaps</div>
         </div>
       </div>
+      <div class="divider"></div>
+      <!-- Annotation code block -->
+      <h3 style="margin-bottom: 0.75rem">Gene Family Annotation (WSL · R)</h3>
+      <p style="font-size:0.85rem; color:var(--muted); margin-bottom:1rem;">
+        DREB, HSF and HSP gene families were identified via Bioconductor annotation packages
+        for <em>Arabidopsis thaliana</em> (TAIR10), yielding a curated table of 43 stress-response genes.
+      </p>
+      <pre style="background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:1.25rem 1.5rem;font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--accent3);overflow-x:auto;line-height:1.7;"><span style="color:var(--muted)"># R · Gene family annotation pipeline</span>
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(AnnotationDbi)
+  library(org.At.tair.db)   <span style="color:var(--muted)"># TAIR10 Arabidopsis annotation</span>
+  library(openxlsx)
+})
+
+<span style="color:var(--muted)"># Extract DREB / HSF / HSP gene families from DESeq2 results</span>
+stress_genes &lt;- results_tbl |&gt;
+  filter(str_detect(Gene_Name, "DREB|HSF|HSP")) |&gt;
+  mutate(Family = case_when(
+    str_detect(Gene_Name, "DREB") ~ "DREB",
+    str_detect(Gene_Name, "HSF")  ~ "HSF",
+    TRUE                           ~ "HSP"
+  ))</pre>
       <div class="divider"></div>
       <h3 style="margin-bottom: 1rem">Dual-Baseline Strategy</h3>
       <div class="baseline-grid">
@@ -2455,131 +2486,123 @@
       </div>
     </section>
 
-    <!-- DREB -->
+    <!-- HSF-HSP CASCADE -->
     <section id="dreb">
       <div class="section-label">06 · Deep Dive</div>
-      <h2>DREB & HSP Gene Family Dynamics</h2>
+      <h2>HSF–HSP Heat-Shock Cascade<br><span style="font-size:0.65em;color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:300;">with DREB-associated stress cross-talk</span></h2>
       <p>
-        DREBs (AP2/ERF transcription factors) — key regulators of abiotic
-        stress. HSPs — molecular chaperones ensuring protein stability.
-        VST-normalized counts, sequential contrasts, Z-score clustered heatmaps.
+        43 genes across three families — <strong style="color:var(--text)">9 DREB</strong> (AP2/ERF transcription factors),
+        <strong style="color:var(--text)">10 HSF</strong> (heat shock factor regulators),
+        <strong style="color:var(--text)">24 HSP</strong> (molecular chaperones) —
+        annotated via <span class="highlight-text">AnnotationDbi / org.At.tair.db</span> and profiled across LHS → LHSR12 → LHSR84.
       </p>
+
       <div class="dreb-intro">
         <div>
           <div class="dreb-highlight">
-            <h4>Conclusion 1 · Temporal Specialization</h4>
+            <h4>Finding 1 · Dominant Effector Response (HSP)</h4>
             <p>
-              DREB2C activates at acute stress, DREB2A/2B coordinate early
-              recovery (12h), and DREB1A/1B exclusively mark late recovery and
-              stress memory formation (84h).
+              All 24 HSP genes respond with massive upregulation (avg log₂FC +3.8 at LHS).
+              Maximum activation: <strong style="color:var(--text)">ATHSP22.0</strong> at log₂FC 8.86 = <em>465× increase</em>.
+              Small HSPs (17–26 kDa) act as the primary proteostasis machinery.
             </p>
           </div>
           <div class="dreb-highlight">
-            <h4>Conclusion 2 · Biphasic Regulation Model</h4>
+            <h4>Finding 2 · Recovery Paradox</h4>
             <p>
-              Phase 1: DREB2 subgroup + small HSPs + HSP101 — emergency. Phase
-              2: DREB1 subgroup + HSFA3 — molecular signature of acquired
-              thermotolerance.
+              HSP expression <strong style="color:var(--text)">peaks at LHSR12</strong> (12h recovery), not during stress itself.
+              HSP26.5: 5.83 → <strong>8.10</strong>; ATHSP22.0: 7.01 → <strong>8.86</strong> — the plant continues
+              intensive protein repair after temperature returns to normal.
             </p>
           </div>
           <div class="dreb-highlight">
-            <h4>Conclusion 3 · DREB–Chaperone Coordination</h4>
+            <h4>Finding 3 · HSF Regulatory Cascade</h4>
             <p>
-              DREB2C correlates with small HSP activity during stress. DREB1A/B
-              activation at 84h synchronized with HSFA3 induction and HSP
-              shutdown — shared DREB–HSF regulatory axis.
+              HSFA6A activates rapidly and transiently (3.88 → 2.67), while ATHSFA1E shows a sustained
+              response (2.26 → 2.41). HSFB2A continues rising into recovery (1.98 → 3.47) — prolonged
+              regulatory signaling even as temperatures normalize.
             </p>
           </div>
           <div class="dreb-highlight">
-            <h4>Conclusion 4 · DREB as Phase Markers</h4>
+            <h4>Finding 4 · DREB Stress Cross-Talk</h4>
             <p>
-              DREB2C → acute stress · DREB2A/2B → early recovery · DREB1A/1B →
-              late adaptation & thermal memory.
+              DREB genes show divergent responses: DREB_A5 strongly activated (+3.81),
+              DREB_A4_1 strongly repressed (−3.14). This bidirectional pattern reflects
+              cross-talk between heat and osmotic/dehydration stress pathways — a unified
+              abiotic stress-acclimation strategy.
             </p>
           </div>
         </div>
         <div>
           <div class="gene-table">
-            <div class="gene-table-title">
-              Significant DREB — Control vs LHS
-            </div>
-            <div class="gene-row">
-              <span class="gene-name">DREB2C</span
-              ><span class="gene-lfc">+1.27 ↑</span>
-            </div>
-            <div class="gene-row">
-              <span class="gene-name">DREB4</span
-              ><span class="gene-lfc">+1.24 ↑</span>
-            </div>
+            <div class="gene-table-title">Top HSP genes · LHS (log₂FC vs Control)</div>
+            <div class="gene-row"><span class="gene-name">HSP21</span><span class="gene-lfc">+7.67 ↑</span></div>
+            <div class="gene-row"><span class="gene-name">ATHSP22.0</span><span class="gene-lfc">+7.01 ↑</span></div>
+            <div class="gene-row"><span class="gene-name">HSP26.5</span><span class="gene-lfc">+5.83 ↑</span></div>
+            <div class="gene-row"><span class="gene-name">HSP18.2</span><span class="gene-lfc">+5.71 ↑</span></div>
+            <div class="gene-row"><span class="gene-name">HSP17.6II</span><span class="gene-lfc">+5.61 ↑</span></div>
           </div>
           <div class="gene-table">
-            <div class="gene-table-title">Top HSP — Control vs LHS</div>
-            <div class="gene-row">
-              <span class="gene-name">HSP21</span
-              ><span class="gene-lfc">+7.67 ↑</span>
-            </div>
-            <div class="gene-row">
-              <span class="gene-name">HSP17.6B</span
-              ><span class="gene-lfc">+5.61 ↑</span>
-            </div>
-            <div class="gene-row">
-              <span class="gene-name">HSP17.6A</span
-              ><span class="gene-lfc">+4.84 ↑</span>
-            </div>
-            <div class="gene-row">
-              <span class="gene-name">HSP70-3</span
-              ><span class="gene-lfc neg">−1.15 ↓</span>
-            </div>
-            <div class="gene-row">
-              <span class="gene-name">HSFA1D</span
-              ><span class="gene-lfc neg">−1.67 ↓</span>
-            </div>
+            <div class="gene-table-title">HSF regulators · LHS (log₂FC vs Control)</div>
+            <div class="gene-row"><span class="gene-name">AT-HSFA6A</span><span class="gene-lfc">+3.88 ↑</span></div>
+            <div class="gene-row"><span class="gene-name">ATHSFA1E</span><span class="gene-lfc">+2.26 ↑</span></div>
+            <div class="gene-row"><span class="gene-name">AT-HSFB2A</span><span class="gene-lfc">+1.98 ↑</span></div>
+            <div class="gene-row"><span class="gene-name">AT-HSFA7A</span><span class="gene-lfc neg">−1.67 ↓</span></div>
+            <div class="gene-row"><span class="gene-name">AT-HSFA6B</span><span class="gene-lfc neg">−3.63 ↓</span></div>
           </div>
           <div class="gene-table">
-            <div class="gene-table-title">Memory markers — LHSR84 vs LHS</div>
-            <div class="gene-row">
-              <span class="gene-name">DREB1A</span
-              ><span class="gene-lfc">+4.49 ↑</span>
-            </div>
-            <div class="gene-row">
-              <span class="gene-name">HSFA3</span
-              ><span class="gene-lfc">+4.88 ↑</span>
-            </div>
-            <div class="gene-row">
-              <span class="gene-name">HSP21</span
-              ><span class="gene-lfc neg">−8.62 ↓</span>
-            </div>
-            <div class="gene-row">
-              <span class="gene-name">HSP17.6B</span
-              ><span class="gene-lfc neg">−7.39 ↓</span>
-            </div>
+            <div class="gene-table-title">DREB cross-talk · LHS (log₂FC vs Control)</div>
+            <div class="gene-row"><span class="gene-name">DREB_A5</span><span class="gene-lfc">+3.81 ↑</span></div>
+            <div class="gene-row"><span class="gene-name">DREB2_A2_1</span><span class="gene-lfc">+1.41 ↑</span></div>
+            <div class="gene-row"><span class="gene-name">DREB19</span><span class="gene-lfc">+1.24 ↑</span></div>
+            <div class="gene-row"><span class="gene-name">DREB2_A2_2</span><span class="gene-lfc neg">−2.70 ↓</span></div>
+            <div class="gene-row"><span class="gene-name">DREB_A4_1</span><span class="gene-lfc neg">−3.14 ↓</span></div>
           </div>
         </div>
       </div>
-      <div class="dreb-graphs">
-        <div class="dreb-graph-full">
-          <div
-            class="img-slot"
-            style="min-height: 380px"
-            onclick="openLightboxEl(this)"
-          >
-            <img src="res/DREB_HSP_C_LHSR.png" alt="" />
-          </div>
+
+      <!-- GRAPH 1: HEATMAP -->
+      <div style="margin-top:3rem;">
+        <div style="font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1rem;">
+          Fig 1 · Selected Stress-Response Gene Dynamics — Heatmap (log₂FC)
         </div>
-        <div
-          class="img-slot"
-          style="min-height: 300px"
-          onclick="openLightboxEl(this)"
-        >
-          <img src="res/Heatmap_LHS_LHSR.png" alt="" />
+        <div class="img-slot" style="height:800px;" onclick="openLightboxEl(this)">
+          <img src="res/heatmap_selected_genes_final.png" alt="Heatmap of selected stress-response genes" />
         </div>
-        <div
-          class="img-slot"
-          style="min-height: 300px"
-          onclick="openLightboxEl(this)"
-        >
-          <img src="res/Heatmap_C_LHSR.png" alt="" />
+        <p class="note" style="margin-top:0.75rem;">Heatmap of selected stress-response genes across three timepoints. Red = upregulation; blue = downregulation. HSP cluster (bottom) shows coherent, high-amplitude activation peaking at LHSR12.</p>
+      </div>
+
+      <!-- GRAPH 2: FAMILY COMPARISON BARPLOT -->
+      <div style="margin-top:2.5rem;">
+        <div style="font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1rem;">
+          Fig 2 · Average Expression Response by Gene Family (Mean log₂FC ± SD)
         </div>
+        <div class="img-slot" style="height:700px;" onclick="openLightboxEl(this)">
+          <img src="res/family_comparison_barplot_final.png" alt="Family comparison barplot" />
+        </div>
+        <p class="note" style="margin-top:0.75rem;">HSP family shows dominant, coherent upregulation across all timepoints. Wide error bars for DREB and HSF reflect bidirectional regulation. HSP peaks at LHSR12, confirming the recovery paradox.</p>
+      </div>
+
+      <!-- GRAPH 3: SCATTER LHS vs LHSR12 -->
+      <div style="margin-top:2.5rem;">
+        <div style="font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1rem;">
+          Fig 3 · Correlation: Stress vs Early Recovery (LHS vs LHSR12) — Scatter Plot
+        </div>
+        <div class="img-slot" style="height:700px;" onclick="openLightboxEl(this)">
+          <img src="res/scatter_LHS_vs_LHSR12.png" alt="Scatter plot LHS vs LHSR12" />
+        </div>
+        <p class="note" style="margin-top:0.75rem;">Points above the diagonal (y=x) indicate genes whose expression <em>increased further</em> during 12h recovery vs stress. The HSP cluster (upper-right) lies systematically above the line — confirming the recovery paradox. DREB/HSF show bidirectional spread.</p>
+      </div>
+
+      <!-- GRAPH 4: Recovery Efficiency -->
+      <div style="margin-top:2.5rem;">
+        <div style="font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1rem;">
+          Fig 4 · Recovery Efficiency: Identifying Molecular Memory
+        </div>
+        <div class="img-slot" style="height:800px;" onclick="openLightboxEl(this)">
+          <img src="res\recovery_efficiency.png" alt="Recovery Efficiency" />
+        </div>
+        <p class="note" style="margin-top:0.75rem;">The graph illustrates the percentage of residual gene expression 84 hours after heat stress relief compared to the peak response. High values (>50%) identify genes that maintain prolonged activity, facilitating plant adaptation and readiness for potential recurring stress. Specifically, ATHSP70 and HSP23.5 exhibit the highest efficiency (>100%), highlighting their central role in establishing molecular stress memory (priming). Simultaneously, HSF-regulators (HSFB1, HSFB2A) demonstrate significant persistence, coordinating the late-phase recovery processes. Conversely, the absence of DREB factors in this range confirms their function as “immediate-response” genes, which are rapidly downregulated once physiological conditions normalize.</p>
       </div>
     </section>
 
@@ -2604,16 +2627,22 @@
             <td><span class="status status-yellow">● Slow Recovery</span></td>
           </tr>
           <tr>
-            <td>Emergency Defense (HSP/ROS)</td>
-            <td><span class="status status-green">● Maximum Alert</span></td>
-            <td><span class="status status-yellow">● Fading</span></td>
-            <td><span class="status status-green">● Stress Memory</span></td>
+            <td>HSP Chaperones (sHSPs)</td>
+            <td><span class="status status-green">● Strong activation</span></td>
+            <td><span class="status status-green">● Peak (paradox!)</span></td>
+            <td><span class="status status-yellow">● Subsiding (+2.3)</span></td>
           </tr>
           <tr>
-            <td>Molecular Repair (RNA/Proteins)</td>
-            <td><span class="status status-red">● Paused</span></td>
-            <td><span class="status status-green">● Hyperactive</span></td>
-            <td><span class="status status-green">● Normalized</span></td>
+            <td>HSF Regulators</td>
+            <td><span class="status status-green">● HSFA6A / HSFA1E active</span></td>
+            <td><span class="status status-green">● HSFB2A peaks (+3.47)</span></td>
+            <td><span class="status status-yellow">● HSFB1/B2A memory</span></td>
+          </tr>
+          <tr>
+            <td>DREB Cross-Talk</td>
+            <td><span class="status status-yellow">● Mixed: A5↑ A4↓</span></td>
+            <td><span class="status status-yellow">● DREB19 rising</span></td>
+            <td><span class="status status-red">● Largely off</span></td>
           </tr>
           <tr>
             <td>Growth & Cell Cycle</td>
@@ -2626,12 +2655,6 @@
             <td><span class="status status-red">● Disrupted</span></td>
             <td><span class="status status-red">● Disrupted</span></td>
             <td><span class="status status-yellow">● Recovering</span></td>
-          </tr>
-          <tr>
-            <td>DREB Factors</td>
-            <td><span class="status status-green">● DREB2C active</span></td>
-            <td><span class="status status-green">● DREB2A/2B peak</span></td>
-            <td><span class="status status-green">● DREB1A/1B memory</span></td>
           </tr>
         </tbody>
       </table>
@@ -2657,18 +2680,19 @@
           Overall Conclusion
         </div>
         <p style="color: var(--text); font-size: 0.9rem; line-height: 1.8">
-          Functional analysis of DREB genes in
-          <em>Arabidopsis thaliana</em> revealed clear temporal and functional
-          specialization. DREB2C activates directly under heat stress,
-          coordinating induction of HSP21, HSP17.6A/B and HSP101. Early recovery
-          (12h) is dominated by DREB2A and DREB2B. Late recovery (84h) is
-          characterized by the unique activation of
-          <strong>DREB1A and DREB1B simultaneously with HSFA3</strong> — the
-          molecular signature of completed cellular recovery and stress memory
-          formation. The synchronous shutdown of small HSPs and DREB1/HSFA3
-          activation at 84h confirm the central role of DREB factors in
-          coordinating the multistep molecular recovery program in
-          <em>Arabidopsis thaliana</em>.
+          Transcriptome analysis of <em>Arabidopsis thaliana</em> seedlings under long heat stress (37°C, 30h)
+          revealed a highly coordinated HSF–HSP heat-shock cascade involving 43 genes across three
+          stress-response families. The response is dominated by
+          <strong>small HSPs</strong> (17–26 kDa), which reached up to <strong>465× upregulation</strong>
+          (ATHSP22.0: log₂FC 8.86), driven by master regulators HSFA6A and ATHSFA1E.
+          A striking <strong>recovery paradox</strong> was observed: HSP expression
+          <em>peaks at 12h post-stress</em> (LHSR12), not during the stress itself, demonstrating
+          that proteostasis maintenance continues long after temperature normalization.
+          At 84h, ATHSP70 retains >100% of its initial response — a marker of
+          <strong>stress memory and priming</strong> for future heat events. DREB transcription factors
+          show bidirectional regulation, confirming significant cross-talk between the heat-stress
+          and osmotic/dehydration signaling pathways — a unified abiotic stress-acclimation strategy
+          in <em>Arabidopsis thaliana</em>.
         </p>
       </div>
     </section>
@@ -2695,6 +2719,10 @@
         </div>
         <div class="tech-group">
           <div class="tech-group-title">Statistical Analysis · R</div>
+          <div class="tech-item">
+            <span class="tech-dot" style="background: var(--accent3)"></span
+            >AnnotationDbi / org.At.tair.db — gene annotation
+          </div>
           <div class="tech-item">
             <span class="tech-dot" style="background: var(--accent3)"></span
             >DESeq2 — DGE, VST normalization
